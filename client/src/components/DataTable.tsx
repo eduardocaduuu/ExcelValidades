@@ -1,27 +1,94 @@
 import { useState } from 'react';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, X } from 'lucide-react';
 import { Product } from '@shared/schema';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface DataTableProps {
   products: Product[];
   isLoading: boolean;
 }
 
+interface FilterState {
+  name: string;
+  brand: string;
+  quantityMin: string;
+  quantityMax: string;
+  status: string;
+  damaged: string;
+}
+
 export default function DataTable({ products, isLoading }: DataTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({
+    name: '',
+    brand: '',
+    quantityMin: '',
+    quantityMax: '',
+    status: '',
+    damaged: ''
+  });
   const itemsPerPage = 10;
 
-  const filteredProducts = products.filter(product =>
-    product.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.marca.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = products.filter(product => {
+    // Text search (works on all fields for general search)
+    const matchesSearch = searchTerm === '' || 
+      product.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.quantidade.toString().includes(searchTerm) ||
+      product.statusValidade.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (product.avariado ? 'sim' : 'não').includes(searchTerm.toLowerCase());
+
+    // Advanced filters
+    const matchesName = filters.name === '' || 
+      product.nome.toLowerCase().includes(filters.name.toLowerCase());
+    
+    const matchesBrand = filters.brand === '' || 
+      product.marca.toLowerCase().includes(filters.brand.toLowerCase());
+    
+    const matchesQuantityMin = filters.quantityMin === '' || 
+      product.quantidade >= parseInt(filters.quantityMin);
+    
+    const matchesQuantityMax = filters.quantityMax === '' || 
+      product.quantidade <= parseInt(filters.quantityMax);
+    
+    const matchesStatus = filters.status === '' || 
+      product.statusValidade === filters.status;
+    
+    const matchesDamaged = filters.damaged === '' || 
+      (filters.damaged === 'sim' && product.avariado) ||
+      (filters.damaged === 'nao' && !product.avariado);
+
+    return matchesSearch && matchesName && matchesBrand && 
+           matchesQuantityMin && matchesQuantityMax && 
+           matchesStatus && matchesDamaged;
+  });
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const displayedProducts = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
+
+  const clearFilters = () => {
+    setFilters({
+      name: '',
+      brand: '',
+      quantityMin: '',
+      quantityMax: '',
+      status: '',
+      damaged: ''
+    });
+    setSearchTerm('');
+    setCurrentPage(1);
+  };
+
+  const hasActiveFilters = Object.values(filters).some(filter => filter !== '') || searchTerm !== '';
+
+  // Get unique values for filter dropdowns
+  const uniqueBrands = Array.from(new Set(products.map(p => p.marca))).sort();
+  const uniqueStatuses = Array.from(new Set(products.map(p => p.statusValidade))).sort();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -49,28 +116,147 @@ export default function DataTable({ products, isLoading }: DataTableProps) {
 
   return (
     <section className="bg-card p-8 neo-border neo-shadow-lg animate-slide-up" data-testid="data-table-section">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h3 className="text-2xl font-black text-foreground">LISTAGEM DE PRODUTOS</h3>
-        <div className="flex gap-4 w-full md:w-auto">
-          <div className="relative flex-1 md:flex-none">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Buscar produtos..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 px-4 py-2 bg-input border-2 border-foreground font-bold neo-shadow text-foreground placeholder-muted-foreground"
-              data-testid="input-search-products"
-            />
+      <div className="mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+          <h3 className="text-2xl font-black text-foreground">LISTAGEM DE PRODUTOS</h3>
+          <div className="flex gap-4 w-full md:w-auto">
+            <div className="relative flex-1 md:flex-none">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Buscar em todos os campos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 px-4 py-2 bg-input border-2 border-foreground font-bold neo-shadow text-foreground placeholder-muted-foreground"
+                data-testid="input-search-products"
+              />
+            </div>
+            <Button 
+              onClick={() => setShowFilters(!showFilters)}
+              className={`px-6 py-2 font-black neo-border neo-shadow hover-lift neo-button ${
+                showFilters ? 'bg-accent text-accent-foreground' : 'bg-primary text-primary-foreground'
+              }`}
+              data-testid="button-toggle-filters"
+            >
+              <Filter className="w-4 h-4 mr-2" />
+              FILTROS
+            </Button>
+            {hasActiveFilters && (
+              <Button 
+                onClick={clearFilters}
+                className="bg-secondary text-secondary-foreground px-4 py-2 font-black neo-border neo-shadow hover-lift neo-button"
+                data-testid="button-clear-filters"
+              >
+                <X className="w-4 h-4 mr-2" />
+                LIMPAR
+              </Button>
+            )}
           </div>
-          <Button 
-            className="bg-primary text-primary-foreground px-6 py-2 font-black neo-border neo-shadow hover-lift neo-button"
-            data-testid="button-filter"
-          >
-            <Filter className="w-4 h-4 mr-2" />
-            FILTRAR
-          </Button>
         </div>
+
+        {/* Advanced Filters Panel */}
+        {showFilters && (
+          <div className="bg-muted p-6 neo-border animate-slide-down mb-4" data-testid="filters-panel">
+            <h4 className="text-lg font-black mb-4 text-foreground">FILTROS AVANÇADOS</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              
+              {/* Name Filter */}
+              <div>
+                <label className="block text-sm font-bold mb-2 text-foreground">NOME DO PRODUTO</label>
+                <Input
+                  type="text"
+                  placeholder="Filtrar por nome..."
+                  value={filters.name}
+                  onChange={(e) => setFilters(prev => ({ ...prev, name: e.target.value }))}
+                  className="bg-input border-2 border-foreground font-bold neo-shadow text-foreground"
+                  data-testid="filter-name"
+                />
+              </div>
+
+              {/* Brand Filter */}
+              <div>
+                <label className="block text-sm font-bold mb-2 text-foreground">MARCA</label>
+                <Select 
+                  value={filters.brand} 
+                  onValueChange={(value) => setFilters(prev => ({ ...prev, brand: value }))}
+                >
+                  <SelectTrigger className="bg-input border-2 border-foreground font-bold neo-shadow text-foreground" data-testid="filter-brand">
+                    <SelectValue placeholder="Todas as marcas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todas as marcas</SelectItem>
+                    {uniqueBrands.map(brand => (
+                      <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Status Filter */}
+              <div>
+                <label className="block text-sm font-bold mb-2 text-foreground">STATUS</label>
+                <Select 
+                  value={filters.status} 
+                  onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
+                >
+                  <SelectTrigger className="bg-input border-2 border-foreground font-bold neo-shadow text-foreground" data-testid="filter-status">
+                    <SelectValue placeholder="Todos os status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todos os status</SelectItem>
+                    <SelectItem value="verde">VERDE (Válido)</SelectItem>
+                    <SelectItem value="amarelo">AMARELO (Atenção)</SelectItem>
+                    <SelectItem value="vermelho">VERMELHO (Vencido)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Quantity Range */}
+              <div>
+                <label className="block text-sm font-bold mb-2 text-foreground">QUANTIDADE MÍNIMA</label>
+                <Input
+                  type="number"
+                  placeholder="Mín..."
+                  value={filters.quantityMin}
+                  onChange={(e) => setFilters(prev => ({ ...prev, quantityMin: e.target.value }))}
+                  className="bg-input border-2 border-foreground font-bold neo-shadow text-foreground"
+                  data-testid="filter-quantity-min"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold mb-2 text-foreground">QUANTIDADE MÁXIMA</label>
+                <Input
+                  type="number"
+                  placeholder="Máx..."
+                  value={filters.quantityMax}
+                  onChange={(e) => setFilters(prev => ({ ...prev, quantityMax: e.target.value }))}
+                  className="bg-input border-2 border-foreground font-bold neo-shadow text-foreground"
+                  data-testid="filter-quantity-max"
+                />
+              </div>
+
+              {/* Damaged Filter */}
+              <div>
+                <label className="block text-sm font-bold mb-2 text-foreground">AVARIADO</label>
+                <Select 
+                  value={filters.damaged} 
+                  onValueChange={(value) => setFilters(prev => ({ ...prev, damaged: value }))}
+                >
+                  <SelectTrigger className="bg-input border-2 border-foreground font-bold neo-shadow text-foreground" data-testid="filter-damaged">
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="sim">SIM (Avariados)</SelectItem>
+                    <SelectItem value="nao">NÃO (Não avariados)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+            </div>
+          </div>
+        )}
       </div>
       
       {products.length === 0 ? (
