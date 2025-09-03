@@ -61,7 +61,7 @@ export default function Dashboard() {
                           {brand.marca}
                         </p>
                         <p className="text-lg font-bold" data-testid={`text-top-green-count-${index}`}>
-                          {brand.green} produtos
+                          {brand.green} produtos ({brand.totalStock.toLocaleString('pt-BR')} unidades)
                         </p>
                       </div>
                     ))
@@ -84,7 +84,7 @@ export default function Dashboard() {
                           {brand.marca}
                         </p>
                         <p className="text-lg font-bold" data-testid={`text-top-red-count-${index}`}>
-                          {brand.red} produtos
+                          {brand.red} produtos ({brand.totalStock.toLocaleString('pt-BR')} unidades)
                         </p>
                       </div>
                     ))
@@ -107,7 +107,7 @@ export default function Dashboard() {
                           {brand.marca}
                         </p>
                         <p className="text-lg font-bold" data-testid={`text-top-yellow-count-${index}`}>
-                          {brand.yellow} produtos
+                          {brand.yellow} produtos ({brand.totalStock.toLocaleString('pt-BR')} unidades)
                         </p>
                       </div>
                     ))
@@ -130,7 +130,7 @@ export default function Dashboard() {
                           {brand.marca}
                         </p>
                         <p className="text-lg font-bold" data-testid={`text-top-damaged-count-${index}`}>
-                          {brand.damaged} produtos
+                          {brand.damaged} produtos ({brand.totalStock.toLocaleString('pt-BR')} unidades)
                         </p>
                       </div>
                     ))
