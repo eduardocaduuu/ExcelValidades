@@ -182,7 +182,7 @@ export default function Dashboard() {
       <footer className="bg-foreground text-background p-6 mt-12 neo-border-thick border-t-0" data-testid="app-footer">
         <div className="container mx-auto text-center">
           <p className="text-lg font-black">
-            EXCEL VALIDADES © 2024 - CONTROLE TOTAL DE VALIDADE
+            EXCEL VALIDADES © 2025 - CONTROLE TOTAL DE VALIDADE
           </p>
         </div>
       </footer>
