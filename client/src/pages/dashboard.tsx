@@ -51,7 +51,7 @@ export default function Dashboard() {
                 <div className="w-16 h-16 mx-auto mb-4 bg-primary rounded-full flex items-center justify-center neo-border">
                   <Trophy className="w-8 h-8 text-primary-foreground" />
                 </div>
-                <h4 className="text-xl font-black mb-2">MAIS PRODUTOS VÁLIDOS</h4>
+                <h4 className="text-xl font-black mb-2">MAIS UNIDADES VÁLIDAS</h4>
                 <div className="space-y-2">
                   {stats.allBrandStats
                     .filter(brand => brand.green === Math.max(...stats.allBrandStats.map(b => b.green)))
@@ -61,7 +61,7 @@ export default function Dashboard() {
                           {brand.marca}
                         </p>
                         <p className="text-lg font-bold" data-testid={`text-top-green-count-${index}`}>
-                          {brand.green} produtos ({brand.totalStock.toLocaleString('pt-BR')} unidades)
+                          {brand.green.toLocaleString('pt-BR')} unidades válidas
                         </p>
                       </div>
                     ))
@@ -74,7 +74,7 @@ export default function Dashboard() {
                 <div className="w-16 h-16 mx-auto mb-4 bg-destructive rounded-full flex items-center justify-center neo-border">
                   <AlertCircle className="w-8 h-8 text-destructive-foreground" />
                 </div>
-                <h4 className="text-xl font-black mb-2">MAIS PRODUTOS VENCIDOS</h4>
+                <h4 className="text-xl font-black mb-2">MAIS UNIDADES VENCIDAS</h4>
                 <div className="space-y-2">
                   {stats.allBrandStats
                     .filter(brand => brand.red === Math.max(...stats.allBrandStats.map(b => b.red)))
@@ -84,7 +84,7 @@ export default function Dashboard() {
                           {brand.marca}
                         </p>
                         <p className="text-lg font-bold" data-testid={`text-top-red-count-${index}`}>
-                          {brand.red} produtos ({brand.totalStock.toLocaleString('pt-BR')} unidades)
+                          {brand.red.toLocaleString('pt-BR')} unidades vencidas
                         </p>
                       </div>
                     ))
@@ -97,7 +97,7 @@ export default function Dashboard() {
                 <div className="w-16 h-16 mx-auto mb-4 bg-accent rounded-full flex items-center justify-center neo-border">
                   <AlertTriangle className="w-8 h-8 text-accent-foreground" />
                 </div>
-                <h4 className="text-xl font-black mb-2">MAIS PRODUTOS ATENÇÃO</h4>
+                <h4 className="text-xl font-black mb-2">MAIS UNIDADES EM ATENÇÃO</h4>
                 <div className="space-y-2">
                   {stats.allBrandStats
                     .filter(brand => brand.yellow === Math.max(...stats.allBrandStats.map(b => b.yellow)))
@@ -107,7 +107,7 @@ export default function Dashboard() {
                           {brand.marca}
                         </p>
                         <p className="text-lg font-bold" data-testid={`text-top-yellow-count-${index}`}>
-                          {brand.yellow} produtos ({brand.totalStock.toLocaleString('pt-BR')} unidades)
+                          {brand.yellow.toLocaleString('pt-BR')} unidades em atenção
                         </p>
                       </div>
                     ))
@@ -120,7 +120,7 @@ export default function Dashboard() {
                 <div className="w-16 h-16 mx-auto mb-4 bg-secondary rounded-full flex items-center justify-center neo-border">
                   <Hammer className="w-8 h-8 text-secondary-foreground" />
                 </div>
-                <h4 className="text-xl font-black mb-2">MAIS PRODUTOS AVARIADOS</h4>
+                <h4 className="text-xl font-black mb-2">MAIS UNIDADES AVARIADAS</h4>
                 <div className="space-y-2">
                   {stats.allBrandStats
                     .filter(brand => brand.damaged === Math.max(...stats.allBrandStats.map(b => b.damaged)))
@@ -130,7 +130,7 @@ export default function Dashboard() {
                           {brand.marca}
                         </p>
                         <p className="text-lg font-bold" data-testid={`text-top-damaged-count-${index}`}>
-                          {brand.damaged} produtos ({brand.totalStock.toLocaleString('pt-BR')} unidades)
+                          {brand.damaged.toLocaleString('pt-BR')} unidades avariadas
                         </p>
                       </div>
                     ))

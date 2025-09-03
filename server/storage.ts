@@ -95,11 +95,13 @@ export class MemStorage implements IStorage {
       stats.total++;
       stats.totalStock += product.quantidade;
       
-      if (product.statusValidade === 'verde') stats.green++;
-      else if (product.statusValidade === 'vermelho') stats.red++;
-      else if (product.statusValidade === 'amarelo') stats.yellow++;
+      // Sum quantities by status instead of counting products
+      if (product.statusValidade === 'verde') stats.green += product.quantidade;
+      else if (product.statusValidade === 'vermelho') stats.red += product.quantidade;
+      else if (product.statusValidade === 'amarelo') stats.yellow += product.quantidade;
       
-      if (product.avariado) stats.damaged++;
+      // For damaged products, sum quantities too
+      if (product.avariado) stats.damaged += product.quantidade;
     });
 
     // Convert to array and sort
