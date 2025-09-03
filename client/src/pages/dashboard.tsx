@@ -1,4 +1,4 @@
-import { Trophy, AlertCircle, Hammer } from 'lucide-react';
+import { Trophy, AlertCircle, Hammer, AlertTriangle } from 'lucide-react';
 import { useProducts, useDashboardStats } from '@/hooks/useExcelData';
 import FileUpload from '@/components/FileUpload';
 import SummaryCards from '@/components/SummaryCards';
@@ -44,7 +44,7 @@ export default function Dashboard() {
           <section className="bg-card p-8 neo-border neo-shadow-lg animate-slide-up" data-testid="brand-analysis-section">
             <h2 className="text-3xl font-black mb-8 text-foreground">RESUMO DAS MARCAS</h2>
             
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8">
               
               {/* Brands with Most Green Products */}
               <div className="text-center p-6 bg-muted neo-border hover:bg-accent hover:text-accent-foreground transition-colors hover-lift" data-testid="brand-most-green">
@@ -85,6 +85,29 @@ export default function Dashboard() {
                         </p>
                         <p className="text-lg font-bold" data-testid={`text-top-red-count-${index}`}>
                           {brand.red} produtos
+                        </p>
+                      </div>
+                    ))
+                  }
+                </div>
+              </div>
+
+              {/* Brands with Most Yellow Products */}
+              <div className="text-center p-6 bg-muted neo-border hover:bg-accent hover:text-accent-foreground transition-colors hover-lift" data-testid="brand-most-yellow">
+                <div className="w-16 h-16 mx-auto mb-4 bg-accent rounded-full flex items-center justify-center neo-border">
+                  <AlertTriangle className="w-8 h-8 text-accent-foreground" />
+                </div>
+                <h4 className="text-xl font-black mb-2">MAIS PRODUTOS ATENÇÃO</h4>
+                <div className="space-y-2">
+                  {stats.allBrandStats
+                    .filter(brand => brand.yellow === Math.max(...stats.allBrandStats.map(b => b.yellow)))
+                    .map((brand, index) => (
+                      <div key={brand.marca} className="border-b pb-2" data-testid={`top-yellow-brand-${index}`}>
+                        <p className="text-2xl font-black" style={{ color: '#EAB308' }} data-testid={`text-top-yellow-brand-${index}`}>
+                          {brand.marca}
+                        </p>
+                        <p className="text-lg font-bold" data-testid={`text-top-yellow-count-${index}`}>
+                          {brand.yellow} produtos
                         </p>
                       </div>
                     ))
