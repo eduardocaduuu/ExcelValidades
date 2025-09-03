@@ -1,0 +1,832 @@
+<html lang="pt-BR" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Validades - Dashboard Neobrutalista</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    destructive: {
+                        DEFAULT: "var(--destructive)",
+                        foreground: "var(--destructive-foreground)",
+                    },
+                    border: "var(--border)",
+                    input: "var(--input)",
+                    ring: "var(--ring)",
+                },
+                fontFamily: {
+                    sans: ["Inter", "sans-serif"],
+                }
+            },
+        }
+    };
+    </script>
+    
+    <style>
+        :root {
+            --background: hsl(210 40% 96%);
+            --foreground: hsl(222 84% 4%);
+            --card: hsl(0 0% 100%);
+            --card-foreground: hsl(222 84% 4%);
+            --primary: hsl(221 100% 50%);
+            --primary-foreground: hsl(0 0% 100%);
+            --secondary: hsl(330 100% 50%);
+            --secondary-foreground: hsl(0 0% 100%);
+            --muted: hsl(210 40% 92%);
+            --muted-foreground: hsl(215 16% 45%);
+            --accent: hsl(60 100% 50%);
+            --accent-foreground: hsl(222 84% 4%);
+            --destructive: hsl(0 84% 60%);
+            --destructive-foreground: hsl(0 0% 100%);
+            --border: hsl(214 32% 91%);
+            --input: hsl(214 32% 91%);
+            --ring: hsl(221 100% 50%);
+            --radius: 8px;
+        }
+        
+        /* Neobrutalist Custom Styles */
+        .neo-shadow {
+            box-shadow: 6px 6px 0px #000000;
+        }
+        
+        .neo-shadow-lg {
+            box-shadow: 8px 8px 0px #000000;
+        }
+        
+        .neo-border {
+            border: 4px solid #000000;
+        }
+        
+        .neo-border-thick {
+            border: 6px solid #000000;
+        }
+        
+        .animate-bounce-in {
+            animation: bounceIn 0.6s ease-out;
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .animate-slide-up {
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .hover-lift {
+            transition: all 0.2s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 10px 10px 0px #000000;
+        }
+        
+        /* Custom button styles */
+        .neo-button {
+            transition: all 0.1s ease;
+        }
+        
+        .neo-button:active {
+            transform: translate(3px, 3px);
+            box-shadow: 3px 3px 0px #000000;
+        }
+    </style>
+</head>
+
+<!-- @COMPONENT: ExcelValidadesApp [main application container] -->
+<body class="bg-background text-foreground font-sans min-h-screen">
+    
+    <!-- @COMPONENT: Header [application header with branding] -->
+    <header class="bg-primary p-6 neo-border-thick border-b-0">
+        <div class="container mx-auto">
+            <h1 class="text-4xl lg:text-6xl font-black text-primary-foreground tracking-tight">
+                EXCEL VALIDADES
+            </h1>
+            <p class="text-xl font-bold text-primary-foreground mt-2 opacity-90">
+                Dashboard de Controle de Validade
+            </p>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: Header -->
+
+    <main class="container mx-auto p-6 space-y-8">
+        
+        <!-- @COMPONENT: FileUpload [Excel file upload section] -->
+        <section class="bg-card p-8 neo-border neo-shadow-lg hover-lift animate-slide-up">
+            <div class="text-center">
+                <h2 class="text-3xl font-black mb-6 text-foreground">
+                    UPLOAD DA PLANILHA
+                </h2>
+                
+                <!-- @FUNCTIONALITY: File upload with drag-and-drop using SheetJS for parsing .xlsx files -->
+                <div class="border-4 border-dashed border-foreground p-12 bg-muted hover:bg-accent transition-colors duration-200 cursor-pointer" 
+                     data-implementation="Implement drag-and-drop file upload with SheetJS parsing">
+                    <i class="fas fa-cloud-upload-alt text-6xl text-foreground mb-4"></i>
+                    <p class="text-2xl font-bold text-foreground mb-2">
+                        Arraste seu arquivo .xlsx aqui
+                    </p>
+                    <p class="text-lg font-semibold text-muted-foreground">
+                        ou clique para selecionar
+                    </p>
+                    <input type="file" 
+                           accept=".xlsx" 
+                           class="hidden" 
+                           data-event="change:handleFileUpload"
+                           data-mock="true">
+                </div>
+                
+                <button class="mt-6 bg-secondary text-secondary-foreground px-8 py-4 text-xl font-black neo-border neo-shadow hover-lift neo-button"
+                        data-event="click:processFile">
+                    PROCESSAR ARQUIVO
+                </button>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: FileUpload -->
+
+        <!-- @COMPONENT: SummaryCards [animated summary statistics] -->
+        <!-- @STATE: fileData:object = null, isLoading:boolean = false -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-slide-up">
+            
+            <div class="bg-accent p-6 neo-border neo-shadow hover-lift animate-bounce-in" style="animation-delay: 0.1s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-bold text-accent-foreground uppercase tracking-wide">Total Produtos</p>
+                        <p class="text-4xl font-black text-accent-foreground" data-bind="totalProducts">1,247</p>
+                    </div>
+                    <i class="fas fa-boxes text-3xl text-accent-foreground"></i>
+                </div>
+            </div>
+
+            <div class="bg-destructive p-6 neo-border neo-shadow hover-lift animate-bounce-in" style="animation-delay: 0.2s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-bold text-destructive-foreground uppercase tracking-wide">Vencidos</p>
+                        <p class="text-4xl font-black text-destructive-foreground" data-bind="expiredProducts">89</p>
+                    </div>
+                    <i class="fas fa-exclamation-triangle text-3xl text-destructive-foreground"></i>
+                </div>
+            </div>
+
+            <div class="bg-secondary p-6 neo-border neo-shadow hover-lift animate-bounce-in" style="animation-delay: 0.3s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-bold text-secondary-foreground uppercase tracking-wide">Avariados</p>
+                        <p class="text-4xl font-black text-secondary-foreground" data-bind="damagedProducts">23</p>
+                    </div>
+                    <i class="fas fa-broken-image text-3xl text-secondary-foreground"></i>
+                </div>
+            </div>
+
+            <div class="bg-primary p-6 neo-border neo-shadow hover-lift animate-bounce-in" style="animation-delay: 0.4s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-bold text-primary-foreground uppercase tracking-wide">Em Estoque</p>
+                        <p class="text-4xl font-black text-primary-foreground" data-bind="totalStock">45,892</p>
+                    </div>
+                    <i class="fas fa-warehouse text-3xl text-primary-foreground"></i>
+                </div>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: SummaryCards -->
+
+        <!-- @COMPONENT: ChartsSection [main dashboard charts] -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Status Distribution Chart -->
+            <div class="bg-card p-8 neo-border neo-shadow-lg hover-lift animate-slide-up">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-black text-foreground">STATUS DAS VALIDADES</h3>
+                    <button class="bg-muted text-muted-foreground p-2 neo-border hover:bg-accent hover:text-accent-foreground transition-colors neo-button">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+                <!-- @FUNCTIONALITY: Pie chart showing distribution of red, yellow, green status using Chart.js -->
+                <div class="relative h-80" data-implementation="Implement Chart.js pie chart with animated transitions">
+                    <canvas id="statusChart" data-mock="true"></canvas>
+                </div>
+                <div class="mt-4 grid grid-cols-3 gap-4 text-center">
+                    <div class="p-3 bg-destructive text-destructive-foreground neo-border">
+                        <p class="font-black text-lg" data-bind="redStatus">89</p>
+                        <p class="font-bold text-sm">VERMELHO</p>
+                    </div>
+                    <div class="p-3 bg-accent text-accent-foreground neo-border">
+                        <p class="font-black text-lg" data-bind="yellowStatus">234</p>
+                        <p class="font-bold text-sm">AMARELO</p>
+                    </div>
+                    <div class="p-3" style="background-color: #00CC66; color: white;" class="neo-border">
+                        <p class="font-black text-lg" data-bind="greenStatus">924</p>
+                        <p class="font-bold text-sm">VERDE</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Brand Analysis Chart -->
+            <div class="bg-card p-8 neo-border neo-shadow-lg hover-lift animate-slide-up">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-black text-foreground">ANÁLISE POR MARCA</h3>
+                    <button class="bg-muted text-muted-foreground p-2 neo-border hover:bg-accent hover:text-accent-foreground transition-colors neo-button">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+                <!-- @FUNCTIONALITY: Bar chart showing brand analysis with animated bars -->
+                <div class="relative h-80" data-implementation="Implement Chart.js bar chart with brand comparison">
+                    <canvas id="brandChart" data-mock="true"></canvas>
+                </div>
+            </div>
+
+            <!-- Top Products by Stock -->
+            <div class="bg-card p-8 neo-border neo-shadow-lg hover-lift animate-slide-up">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-black text-foreground">TOP PRODUTOS EM ESTOQUE</h3>
+                    <button class="bg-muted text-muted-foreground p-2 neo-border hover:bg-accent hover:text-accent-foreground transition-colors neo-button">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+                
+                <!-- @MAP: topStockProducts.map(product => ( -->
+                <div class="space-y-4" data-implementation="Map over top stock products array">
+                    <div class="flex justify-between items-center p-4 bg-muted neo-border hover:bg-accent hover:text-accent-foreground transition-colors">
+                        <div>
+                            <p class="font-black text-lg" data-bind="product.name">Produto Alpha Max</p>
+                            <p class="font-semibold text-sm text-muted-foreground" data-bind="product.brand">Marca Premium</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-black text-2xl text-primary" data-bind="product.quantity">1,456</p>
+                            <p class="font-bold text-xs uppercase">Unidades</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center p-4 bg-muted neo-border hover:bg-accent hover:text-accent-foreground transition-colors">
+                        <div>
+                            <p class="font-black text-lg" data-bind="product.name">Beta Super Plus</p>
+                            <p class="font-semibold text-sm text-muted-foreground" data-bind="product.brand">MegaCorp</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-black text-2xl text-primary" data-bind="product.quantity">1,203</p>
+                            <p class="font-bold text-xs uppercase">Unidades</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center p-4 bg-muted neo-border hover:bg-accent hover:text-accent-foreground transition-colors">
+                        <div>
+                            <p class="font-black text-lg" data-bind="product.name">Gamma Ultra Pro</p>
+                            <p class="font-semibold text-sm text-muted-foreground" data-bind="product.brand">TechFlow</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-black text-2xl text-primary" data-bind="product.quantity">998</p>
+                            <p class="font-bold text-xs uppercase">Unidades</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_MAP )) -->
+            </div>
+
+            <!-- Critical Status Products -->
+            <div class="bg-card p-8 neo-border neo-shadow-lg hover-lift animate-slide-up">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-black text-foreground">PRODUTOS CRÍTICOS</h3>
+                    <button class="bg-muted text-muted-foreground p-2 neo-border hover:bg-accent hover:text-accent-foreground transition-colors neo-button">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+                
+                <!-- @MAP: criticalProducts.map(product => ( -->
+                <div class="space-y-4" data-implementation="Map over critical products with red status">
+                    <div class="flex justify-between items-center p-4 bg-destructive text-destructive-foreground neo-border">
+                        <div>
+                            <p class="font-black text-lg" data-bind="product.name">Delta Emergency Kit</p>
+                            <p class="font-semibold text-sm opacity-90" data-bind="product.brand">SafeGuard Co.</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-black text-sm" data-bind="product.expiryDate">15/12/2023</p>
+                            <p class="font-bold text-xs uppercase">VENCIDO</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center p-4 bg-destructive text-destructive-foreground neo-border">
+                        <div>
+                            <p class="font-black text-lg" data-bind="product.name">Epsilon Safety Gear</p>
+                            <p class="font-semibold text-sm opacity-90" data-bind="product.brand">ProTech Ltd.</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-black text-sm" data-bind="product.expiryDate">08/01/2024</p>
+                            <p class="font-bold text-xs uppercase">VENCIDO</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center p-4 bg-destructive text-destructive-foreground neo-border">
+                        <div>
+                            <p class="font-black text-lg" data-bind="product.name">Zeta Health Supplies</p>
+                            <p class="font-semibold text-sm opacity-90" data-bind="product.brand">MedLife Inc.</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-black text-sm" data-bind="product.expiryDate">03/02/2024</p>
+                            <p class="font-bold text-xs uppercase">VENCIDO</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_MAP )) -->
+            </div>
+        </section>
+        <!-- @END_COMPONENT: ChartsSection -->
+
+        <!-- @COMPONENT: BrandAnalysisSection [detailed brand statistics] -->
+        <section class="bg-card p-8 neo-border neo-shadow-lg animate-slide-up">
+            <h2 class="text-3xl font-black mb-8 text-foreground">ANÁLISE DETALHADA DAS MARCAS</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Most Green Products Brand -->
+                <div class="text-center p-6 bg-muted neo-border hover:bg-accent hover:text-accent-foreground transition-colors hover-lift">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-primary rounded-full flex items-center justify-center neo-border">
+                        <i class="fas fa-trophy text-2xl text-primary-foreground"></i>
+                    </div>
+                    <h4 class="text-xl font-black mb-2">MAIS PRODUTOS VÁLIDOS</h4>
+                    <p class="text-3xl font-black text-primary mb-2" data-bind="topGreenBrand.name">TechFlow</p>
+                    <p class="text-lg font-bold" data-bind="topGreenBrand.count">456 produtos</p>
+                </div>
+
+                <!-- Most Red Products Brand -->
+                <div class="text-center p-6 bg-muted neo-border hover:bg-accent hover:text-accent-foreground transition-colors hover-lift">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-destructive rounded-full flex items-center justify-center neo-border">
+                        <i class="fas fa-exclamation-circle text-2xl text-destructive-foreground"></i>
+                    </div>
+                    <h4 class="text-xl font-black mb-2">MAIS PRODUTOS VENCIDOS</h4>
+                    <p class="text-3xl font-black text-destructive mb-2" data-bind="topRedBrand.name">OldStock Ltd.</p>
+                    <p class="text-lg font-bold" data-bind="topRedBrand.count">67 produtos</p>
+                </div>
+
+                <!-- Most Damaged Products Brand -->
+                <div class="text-center p-6 bg-muted neo-border hover:bg-accent hover:text-accent-foreground transition-colors hover-lift">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-secondary rounded-full flex items-center justify-center neo-border">
+                        <i class="fas fa-hammer text-2xl text-secondary-foreground"></i>
+                    </div>
+                    <h4 class="text-xl font-black mb-2">MAIS PRODUTOS AVARIADOS</h4>
+                    <p class="text-3xl font-black text-secondary mb-2" data-bind="topDamagedBrand.name">FragileCorp</p>
+                    <p class="text-lg font-bold" data-bind="topDamagedBrand.count">15 produtos</p>
+                </div>
+                
+            </div>
+        </section>
+        <!-- @END_COMPONENT: BrandAnalysisSection -->
+
+        <!-- @COMPONENT: DetailedChartsSection [comprehensive chart displays] -->
+        <section class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            
+            <!-- Comprehensive Brand Chart -->
+            <div class="bg-card p-8 neo-border neo-shadow-lg hover-lift animate-slide-up">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-black text-foreground">MARCAS VS STATUS</h3>
+                    <div class="flex gap-2">
+                        <button class="bg-muted text-muted-foreground p-2 neo-border hover:bg-accent hover:text-accent-foreground transition-colors neo-button">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <button class="bg-muted text-muted-foreground p-2 neo-border hover:bg-accent hover:text-accent-foreground transition-colors neo-button">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- @FUNCTIONALITY: Stacked bar chart showing brands vs status distribution -->
+                <div class="relative h-96" data-implementation="Implement Chart.js stacked bar chart with brand vs status">
+                    <canvas id="brandStatusChart" data-mock="true"></canvas>
+                </div>
+            </div>
+
+            <!-- Stock Quantity Timeline -->
+            <div class="bg-card p-8 neo-border neo-shadow-lg hover-lift animate-slide-up">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-black text-foreground">EVOLUÇÃO DO ESTOQUE</h3>
+                    <div class="flex gap-2">
+                        <button class="bg-muted text-muted-foreground p-2 neo-border hover:bg-accent hover:text-accent-foreground transition-colors neo-button">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <button class="bg-muted text-muted-foreground p-2 neo-border hover:bg-accent hover:text-accent-foreground transition-colors neo-button">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- @FUNCTIONALITY: Line chart showing stock evolution over time -->
+                <div class="relative h-96" data-implementation="Implement Chart.js line chart with stock timeline">
+                    <canvas id="stockTimelineChart" data-mock="true"></canvas>
+                </div>
+            </div>
+            
+        </section>
+        <!-- @END_COMPONENT: DetailedChartsSection -->
+
+        <!-- @COMPONENT: DataTable [product listing table] -->
+        <section class="bg-card p-8 neo-border neo-shadow-lg animate-slide-up">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black text-foreground">LISTAGEM DE PRODUTOS</h3>
+                <div class="flex gap-4">
+                    <input type="text" 
+                           placeholder="Buscar produtos..." 
+                           class="px-4 py-2 bg-input border-2 border-foreground font-bold neo-shadow text-foreground placeholder-muted-foreground"
+                           data-event="input:handleSearch">
+                    <button class="bg-primary text-primary-foreground px-6 py-2 font-black neo-border neo-shadow hover-lift neo-button">
+                        FILTRAR
+                    </button>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full neo-border">
+                    <thead class="bg-primary text-primary-foreground">
+                        <tr>
+                            <th class="p-4 text-left font-black border-r-4 border-foreground">NOME</th>
+                            <th class="p-4 text-left font-black border-r-4 border-foreground">MARCA</th>
+                            <th class="p-4 text-left font-black border-r-4 border-foreground">QUANTIDADE</th>
+                            <th class="p-4 text-left font-black border-r-4 border-foreground">VALIDADE</th>
+                            <th class="p-4 text-left font-black border-r-4 border-foreground">STATUS</th>
+                            <th class="p-4 text-left font-black">AVARIADO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- @MAP: products.map(product => ( -->
+                        <tr class="border-b-4 border-foreground hover:bg-muted transition-colors" data-bind="product" data-mock="true">
+                            <td class="p-4 font-bold border-r-2 border-border" data-bind="product.nome">Produto Alpha Max</td>
+                            <td class="p-4 font-semibold border-r-2 border-border" data-bind="product.marca">TechFlow</td>
+                            <td class="p-4 font-bold border-r-2 border-border" data-bind="product.quantidade">1,456</td>
+                            <td class="p-4 font-semibold border-r-2 border-border" data-bind="product.validade">15/08/2025</td>
+                            <td class="p-4 border-r-2 border-border">
+                                <span class="px-3 py-1 font-black text-xs rounded-none neo-border" 
+                                      style="background-color: #00CC66; color: white;" 
+                                      data-bind="product.statusValidade">VERDE</span>
+                            </td>
+                            <td class="p-4">
+                                <span class="px-3 py-1 bg-muted text-muted-foreground font-black text-xs rounded-none neo-border" 
+                                      data-bind="product.avariado">NÃO</span>
+                            </td>
+                        </tr>
+                        
+                        <tr class="border-b-4 border-foreground hover:bg-muted transition-colors" data-mock="true">
+                            <td class="p-4 font-bold border-r-2 border-border">Beta Super Plus</td>
+                            <td class="p-4 font-semibold border-r-2 border-border">MegaCorp</td>
+                            <td class="p-4 font-bold border-r-2 border-border">1,203</td>
+                            <td class="p-4 font-semibold border-r-2 border-border">22/06/2024</td>
+                            <td class="p-4 border-r-2 border-border">
+                                <span class="px-3 py-1 bg-accent text-accent-foreground font-black text-xs rounded-none neo-border">AMARELO</span>
+                            </td>
+                            <td class="p-4">
+                                <span class="px-3 py-1 bg-muted text-muted-foreground font-black text-xs rounded-none neo-border">NÃO</span>
+                            </td>
+                        </tr>
+                        
+                        <tr class="border-b-4 border-foreground hover:bg-muted transition-colors" data-mock="true">
+                            <td class="p-4 font-bold border-r-2 border-border">Delta Emergency Kit</td>
+                            <td class="p-4 font-semibold border-r-2 border-border">SafeGuard Co.</td>
+                            <td class="p-4 font-bold border-r-2 border-border">89</td>
+                            <td class="p-4 font-semibold border-r-2 border-border">15/12/2023</td>
+                            <td class="p-4 border-r-2 border-border">
+                                <span class="px-3 py-1 bg-destructive text-destructive-foreground font-black text-xs rounded-none neo-border">VERMELHO</span>
+                            </td>
+                            <td class="p-4">
+                                <span class="px-3 py-1 bg-secondary text-secondary-foreground font-black text-xs rounded-none neo-border">SIM</span>
+                            </td>
+                        </tr>
+                        <!-- @END_MAP )) -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="flex justify-between items-center mt-6">
+                <p class="font-bold text-muted-foreground">
+                    Mostrando 1-3 de <span data-bind="totalProducts">1,247</span> produtos
+                </p>
+                <div class="flex gap-2">
+                    <button class="px-4 py-2 bg-muted text-muted-foreground font-black neo-border hover:bg-primary hover:text-primary-foreground transition-colors neo-button">
+                        ANTERIOR
+                    </button>
+                    <button class="px-4 py-2 bg-primary text-primary-foreground font-black neo-border hover:bg-secondary hover:text-secondary-foreground transition-colors neo-button">
+                        1
+                    </button>
+                    <button class="px-4 py-2 bg-muted text-muted-foreground font-black neo-border hover:bg-primary hover:text-primary-foreground transition-colors neo-button">
+                        2
+                    </button>
+                    <button class="px-4 py-2 bg-muted text-muted-foreground font-black neo-border hover:bg-primary hover:text-primary-foreground transition-colors neo-button">
+                        PRÓXIMO
+                    </button>
+                </div>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: DataTable -->
+
+        <!-- @COMPONENT: ExportSection [export functionality] -->
+        <section class="bg-card p-8 neo-border neo-shadow-lg animate-slide-up">
+            <h3 class="text-2xl font-black mb-6 text-foreground">EXPORTAR DADOS</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button class="bg-destructive text-destructive-foreground p-6 font-black text-lg neo-border neo-shadow hover-lift neo-button"
+                        data-event="click:exportPDF">
+                    <i class="fas fa-file-pdf text-2xl mb-2"></i><br>
+                    EXPORTAR PDF
+                </button>
+                <button class="bg-accent text-accent-foreground p-6 font-black text-lg neo-border neo-shadow hover-lift neo-button"
+                        data-event="click:exportImage">
+                    <i class="fas fa-image text-2xl mb-2"></i><br>
+                    EXPORTAR IMAGEM
+                </button>
+                <button class="bg-primary text-primary-foreground p-6 font-black text-lg neo-border neo-shadow hover-lift neo-button"
+                        data-event="click:exportExcel">
+                    <i class="fas fa-file-excel text-2xl mb-2"></i><br>
+                    EXPORTAR EXCEL
+                </button>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: ExportSection -->
+
+    </main>
+
+    <!-- @COMPONENT: Footer [application footer] -->
+    <footer class="bg-foreground text-background p-6 mt-12 neo-border-thick border-t-0">
+        <div class="container mx-auto text-center">
+            <p class="text-lg font-black">
+                EXCEL VALIDADES © 2024 - CONTROLE TOTAL DE VALIDADE
+            </p>
+        </div>
+    </footer>
+    <!-- @END_COMPONENT: Footer -->
+
+    <script>
+        // TODO: Implement SheetJS file parsing logic
+        // TODO: Implement Chart.js chart initialization and data binding
+        // TODO: Implement export functionality (PDF, Image, Excel)
+        // TODO: Implement search and filter functionality
+        // TODO: Implement responsive chart resizing
+        
+        (function() {
+            // Mock chart initialization for demonstration
+            function initializeCharts() {
+                // Status Distribution Chart
+                const statusCtx = document.getElementById('statusChart');
+                if (statusCtx) {
+                    const statusChart = new Chart(statusCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Vermelho', 'Amarelo', 'Verde'],
+                            datasets: [{
+                                data: [89, 234, 924],
+                                backgroundColor: ['#FF3333', '#FFD700', '#00CC66'],
+                                borderColor: '#000000',
+                                borderWidth: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            animation: {
+                                animateScale: true,
+                                duration: 1000
+                            }
+                        }
+                    });
+                }
+
+                // Brand Analysis Chart
+                const brandCtx = document.getElementById('brandChart');
+                if (brandCtx) {
+                    const brandChart = new Chart(brandCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['TechFlow', 'MegaCorp', 'SafeGuard Co.', 'ProTech Ltd.', 'OldStock Ltd.'],
+                            datasets: [{
+                                label: 'Produtos',
+                                data: [456, 234, 189, 156, 89],
+                                backgroundColor: '#0066FF',
+                                borderColor: '#000000',
+                                borderWidth: 3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: '#000000',
+                                        lineWidth: 2
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        color: '#000000',
+                                        lineWidth: 2
+                                    }
+                                }
+                            },
+                            animation: {
+                                duration: 1500,
+                                easing: 'easeOutBounce'
+                            }
+                        }
+                    });
+                }
+
+                // Brand vs Status Chart
+                const brandStatusCtx = document.getElementById('brandStatusChart');
+                if (brandStatusCtx) {
+                    const brandStatusChart = new Chart(brandStatusCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['TechFlow', 'MegaCorp', 'SafeGuard Co.', 'ProTech Ltd.', 'OldStock Ltd.'],
+                            datasets: [
+                                {
+                                    label: 'Verde',
+                                    data: [400, 180, 120, 100, 20],
+                                    backgroundColor: '#00CC66',
+                                    borderColor: '#000000',
+                                    borderWidth: 2
+                                },
+                                {
+                                    label: 'Amarelo',
+                                    data: [50, 40, 50, 40, 20],
+                                    backgroundColor: '#FFD700',
+                                    borderColor: '#000000',
+                                    borderWidth: 2
+                                },
+                                {
+                                    label: 'Vermelho',
+                                    data: [6, 14, 19, 16, 49],
+                                    backgroundColor: '#FF3333',
+                                    borderColor: '#000000',
+                                    borderWidth: 2
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    stacked: true,
+                                    grid: {
+                                        color: '#000000',
+                                        lineWidth: 2
+                                    }
+                                },
+                                y: {
+                                    stacked: true,
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: '#000000',
+                                        lineWidth: 2
+                                    }
+                                }
+                            },
+                            animation: {
+                                duration: 1200,
+                                easing: 'easeOutQuart'
+                            }
+                        }
+                    });
+                }
+
+                // Stock Timeline Chart
+                const stockTimelineCtx = document.getElementById('stockTimelineChart');
+                if (stockTimelineCtx) {
+                    const stockTimelineChart = new Chart(stockTimelineCtx, {
+                        type: 'line',
+                        data: {
+                            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                            datasets: [{
+                                label: 'Estoque Total',
+                                data: [42000, 43500, 45000, 44000, 45892, 46200],
+                                backgroundColor: '#0066FF',
+                                borderColor: '#0066FF',
+                                borderWidth: 4,
+                                pointBackgroundColor: '#000000',
+                                pointBorderColor: '#FFFF00',
+                                pointBorderWidth: 3,
+                                pointRadius: 8,
+                                tension: 0.3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: false,
+                                    grid: {
+                                        color: '#000000',
+                                        lineWidth: 2
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        color: '#000000',
+                                        lineWidth: 2
+                                    }
+                                }
+                            },
+                            animation: {
+                                duration: 2000,
+                                easing: 'easeInOutElastic'
+                            }
+                        }
+                    });
+                }
+            }
+
+            // Initialize charts when DOM is loaded
+            document.addEventListener('DOMContentLoaded', function() {
+                // Add staggered animation to cards
+                const cards = document.querySelectorAll('.animate-bounce-in');
+                cards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                    }, index * 100);
+                });
+
+                // Initialize charts
+                setTimeout(initializeCharts, 500);
+                
+                // Mock file upload functionality
+                const fileInput = document.querySelector('input[type="file"]');
+                const uploadArea = fileInput?.parentElement;
+                
+                if (uploadArea && fileInput) {
+                    uploadArea.addEventListener('click', () => fileInput.click());
+                    
+                    uploadArea.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        uploadArea.classList.add('bg-accent');
+                    });
+                    
+                    uploadArea.addEventListener('dragleave', () => {
+                        uploadArea.classList.remove('bg-accent');
+                    });
+                    
+                    uploadArea.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        uploadArea.classList.remove('bg-accent');
+                        // TODO: Handle file drop and process with SheetJS
+                        console.log('File dropped - implement SheetJS parsing');
+                    });
+                }
+            });
+        })();
+    </script>
+</body>
+<!-- @END_COMPONENT: ExcelValidadesApp -->
+</html>
