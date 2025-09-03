@@ -39,53 +39,80 @@ export default function Dashboard() {
         {/* Charts Section */}
         <ChartsSection stats={stats} isLoading={isLoading} />
 
-        {/* Brand Analysis Section */}
+        {/* Quick Brand Summary */}
         {stats && (
           <section className="bg-card p-8 neo-border neo-shadow-lg animate-slide-up" data-testid="brand-analysis-section">
-            <h2 className="text-3xl font-black mb-8 text-foreground">ANÁLISE DETALHADA DAS MARCAS</h2>
+            <h2 className="text-3xl font-black mb-8 text-foreground">RESUMO DAS MARCAS</h2>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               
-              {/* Most Green Products Brand */}
+              {/* Brands with Most Green Products */}
               <div className="text-center p-6 bg-muted neo-border hover:bg-accent hover:text-accent-foreground transition-colors hover-lift" data-testid="brand-most-green">
                 <div className="w-16 h-16 mx-auto mb-4 bg-primary rounded-full flex items-center justify-center neo-border">
                   <Trophy className="w-8 h-8 text-primary-foreground" />
                 </div>
                 <h4 className="text-xl font-black mb-2">MAIS PRODUTOS VÁLIDOS</h4>
-                <p className="text-3xl font-black text-primary mb-2" data-testid="text-top-green-brand">
-                  {stats.topBrands.mostGreen.name || 'N/A'}
-                </p>
-                <p className="text-lg font-bold" data-testid="text-top-green-count">
-                  {stats.topBrands.mostGreen.count} produtos
-                </p>
+                <div className="space-y-2">
+                  {stats.allBrandStats
+                    .filter(brand => brand.green === Math.max(...stats.allBrandStats.map(b => b.green)))
+                    .map((brand, index) => (
+                      <div key={brand.marca} className="border-b pb-2" data-testid={`top-green-brand-${index}`}>
+                        <p className="text-2xl font-black text-primary" data-testid={`text-top-green-brand-${index}`}>
+                          {brand.marca}
+                        </p>
+                        <p className="text-lg font-bold" data-testid={`text-top-green-count-${index}`}>
+                          {brand.green} produtos
+                        </p>
+                      </div>
+                    ))
+                  }
+                </div>
               </div>
 
-              {/* Most Red Products Brand */}
+              {/* Brands with Most Red Products */}
               <div className="text-center p-6 bg-muted neo-border hover:bg-accent hover:text-accent-foreground transition-colors hover-lift" data-testid="brand-most-red">
                 <div className="w-16 h-16 mx-auto mb-4 bg-destructive rounded-full flex items-center justify-center neo-border">
                   <AlertCircle className="w-8 h-8 text-destructive-foreground" />
                 </div>
                 <h4 className="text-xl font-black mb-2">MAIS PRODUTOS VENCIDOS</h4>
-                <p className="text-3xl font-black text-destructive mb-2" data-testid="text-top-red-brand">
-                  {stats.topBrands.mostRed.name || 'N/A'}
-                </p>
-                <p className="text-lg font-bold" data-testid="text-top-red-count">
-                  {stats.topBrands.mostRed.count} produtos
-                </p>
+                <div className="space-y-2">
+                  {stats.allBrandStats
+                    .filter(brand => brand.red === Math.max(...stats.allBrandStats.map(b => b.red)))
+                    .map((brand, index) => (
+                      <div key={brand.marca} className="border-b pb-2" data-testid={`top-red-brand-${index}`}>
+                        <p className="text-2xl font-black text-destructive" data-testid={`text-top-red-brand-${index}`}>
+                          {brand.marca}
+                        </p>
+                        <p className="text-lg font-bold" data-testid={`text-top-red-count-${index}`}>
+                          {brand.red} produtos
+                        </p>
+                      </div>
+                    ))
+                  }
+                </div>
               </div>
 
-              {/* Most Damaged Products Brand */}
+              {/* Brands with Most Damaged Products */}
               <div className="text-center p-6 bg-muted neo-border hover:bg-accent hover:text-accent-foreground transition-colors hover-lift" data-testid="brand-most-damaged">
                 <div className="w-16 h-16 mx-auto mb-4 bg-secondary rounded-full flex items-center justify-center neo-border">
                   <Hammer className="w-8 h-8 text-secondary-foreground" />
                 </div>
                 <h4 className="text-xl font-black mb-2">MAIS PRODUTOS AVARIADOS</h4>
-                <p className="text-3xl font-black text-secondary mb-2" data-testid="text-top-damaged-brand">
-                  {stats.topBrands.mostDamaged.name || 'N/A'}
-                </p>
-                <p className="text-lg font-bold" data-testid="text-top-damaged-count">
-                  {stats.topBrands.mostDamaged.count} produtos
-                </p>
+                <div className="space-y-2">
+                  {stats.allBrandStats
+                    .filter(brand => brand.damaged === Math.max(...stats.allBrandStats.map(b => b.damaged)))
+                    .map((brand, index) => (
+                      <div key={brand.marca} className="border-b pb-2" data-testid={`top-damaged-brand-${index}`}>
+                        <p className="text-2xl font-black text-secondary" data-testid={`text-top-damaged-brand-${index}`}>
+                          {brand.marca}
+                        </p>
+                        <p className="text-lg font-bold" data-testid={`text-top-damaged-count-${index}`}>
+                          {brand.damaged} produtos
+                        </p>
+                      </div>
+                    ))
+                  }
+                </div>
               </div>
               
             </div>

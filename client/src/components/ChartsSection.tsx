@@ -3,7 +3,16 @@ import { Download } from 'lucide-react';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
 import { DashboardStats } from '@shared/schema';
-import { createStatusChartData, createBrandChartData, pieChartOptions, chartOptions } from '@/lib/chartUtils';
+import { 
+  createStatusChartData, 
+  createBrandChartData, 
+  createBrandStatusComparisonData,
+  createBrandStockData,
+  createBrandDamagedData,
+  pieChartOptions, 
+  chartOptions,
+  barChartOptionsWithLegend
+} from '@/lib/chartUtils';
 import { Button } from '@/components/ui/button';
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -41,9 +50,14 @@ export default function ChartsSection({ stats, isLoading }: ChartsSectionProps) 
 
   const statusChartData = createStatusChartData(stats);
   const brandChartData = createBrandChartData(stats.topBrands);
+  const brandStatusComparisonData = createBrandStatusComparisonData(stats.allBrandStats);
+  const brandStockData = createBrandStockData(stats.allBrandStats);
+  const brandDamagedData = createBrandDamagedData(stats.allBrandStats);
 
   return (
-    <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className="space-y-8">
+      {/* Original Charts Section */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       
       {/* Status Distribution Chart */}
       <div className="bg-card p-8 neo-border neo-shadow-lg hover-lift animate-slide-up" data-testid="chart-status-distribution">
@@ -121,5 +135,134 @@ export default function ChartsSection({ stats, isLoading }: ChartsSectionProps) 
         </div>
       </div>
     </section>
+
+      {/* Enhanced Brand Analytics Section */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Brand Status Comparison Chart */}
+        <div className="bg-card p-8 neo-border neo-shadow-lg hover-lift animate-slide-up" data-testid="chart-brand-status-comparison">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-black text-foreground">COMPARAÇÃO DE STATUS POR MARCA</h3>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="neo-border hover-lift neo-button"
+              data-testid="button-export-brand-comparison"
+            >
+              <Download className="w-4 h-4" />
+            </Button>
+          </div>
+          
+          <div className="relative h-80">
+            <Bar data={brandStatusComparisonData} options={barChartOptionsWithLegend} />
+          </div>
+        </div>
+
+        {/* Brand Stock Distribution */}
+        <div className="bg-card p-8 neo-border neo-shadow-lg hover-lift animate-slide-up" data-testid="chart-brand-stock">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-black text-foreground">ESTOQUE POR MARCA</h3>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="neo-border hover-lift neo-button"
+              data-testid="button-export-brand-stock"
+            >
+              <Download className="w-4 h-4" />
+            </Button>
+          </div>
+          
+          <div className="relative h-80">
+            <Bar data={brandStockData} options={chartOptions} />
+          </div>
+        </div>
+
+        {/* Damaged Products by Brand */}
+        {brandDamagedData.labels.length > 0 && (
+          <div className="bg-card p-8 neo-border neo-shadow-lg hover-lift animate-slide-up" data-testid="chart-brand-damaged">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-black text-foreground">PRODUTOS AVARIADOS POR MARCA</h3>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="neo-border hover-lift neo-button"
+                data-testid="button-export-brand-damaged"
+              >
+                <Download className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="relative h-80">
+              <Doughnut data={brandDamagedData} options={pieChartOptions} />
+            </div>
+          </div>
+        )}
+        
+      </section>
+
+      {/* Detailed Brand Statistics Table */}
+      <section className="bg-card p-8 neo-border neo-shadow-lg animate-slide-up" data-testid="brand-stats-table">
+        <h3 className="text-2xl font-black mb-6 text-foreground">ESTATÍSTICAS DETALHADAS DAS MARCAS</h3>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full neo-border" data-testid="brands-table">
+            <thead className="bg-primary text-primary-foreground">
+              <tr>
+                <th className="p-4 text-left font-black border-r-4 border-foreground">MARCA</th>
+                <th className="p-4 text-left font-black border-r-4 border-foreground">TOTAL</th>
+                <th className="p-4 text-left font-black border-r-4 border-foreground">VERDE</th>
+                <th className="p-4 text-left font-black border-r-4 border-foreground">AMARELO</th>
+                <th className="p-4 text-left font-black border-r-4 border-foreground">VERMELHO</th>
+                <th className="p-4 text-left font-black border-r-4 border-foreground">AVARIADOS</th>
+                <th className="p-4 text-left font-black">ESTOQUE TOTAL</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.allBrandStats.map((brand, index) => (
+                <tr 
+                  key={brand.marca}
+                  className="border-b-4 border-foreground hover:bg-muted transition-colors"
+                  data-testid={`brand-row-${index}`}
+                >
+                  <td className="p-4 font-bold border-r-2 border-border" data-testid={`brand-name-${index}`}>
+                    {brand.marca}
+                  </td>
+                  <td className="p-4 font-bold border-r-2 border-border" data-testid={`brand-total-${index}`}>
+                    {brand.total}
+                  </td>
+                  <td className="p-4 font-semibold border-r-2 border-border">
+                    <span className="px-2 py-1 bg-green-status text-white font-black text-xs neo-border" data-testid={`brand-green-${index}`}>
+                      {brand.green}
+                    </span>
+                  </td>
+                  <td className="p-4 font-semibold border-r-2 border-border">
+                    <span className="px-2 py-1 bg-yellow-status text-black font-black text-xs neo-border" data-testid={`brand-yellow-${index}`}>
+                      {brand.yellow}
+                    </span>
+                  </td>
+                  <td className="p-4 font-semibold border-r-2 border-border">
+                    <span className="px-2 py-1 bg-red-status text-white font-black text-xs neo-border" data-testid={`brand-red-${index}`}>
+                      {brand.red}
+                    </span>
+                  </td>
+                  <td className="p-4 font-semibold border-r-2 border-border" data-testid={`brand-damaged-${index}`}>
+                    <span className={`px-2 py-1 font-black text-xs neo-border ${
+                      brand.damaged > 0 
+                        ? 'bg-secondary text-secondary-foreground' 
+                        : 'bg-muted text-muted-foreground'
+                    }`}>
+                      {brand.damaged}
+                    </span>
+                  </td>
+                  <td className="p-4 font-bold" data-testid={`brand-stock-${index}`}>
+                    {brand.totalStock.toLocaleString('pt-BR')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Product, type InsertProduct, type DashboardStats } from "@shared/schema";
+import { type User, type InsertUser, type Product, type InsertProduct, type DashboardStats, type BrandStats } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -49,6 +49,7 @@ export class MemStorage implements IStorage {
     const product: Product = { 
       ...insertProduct, 
       id,
+      avariado: insertProduct.avariado ?? false,
       uploadedAt: new Date()
     };
     this.products.set(id, product);
@@ -83,14 +84,16 @@ export class MemStorage implements IStorage {
     };
 
     // Brand analysis
-    const brandStats = new Map<string, { green: number; red: number; yellow: number; damaged: number }>();
+    const brandStatsMap = new Map<string, { green: number; red: number; yellow: number; damaged: number; total: number; totalStock: number }>();
     
     allProducts.forEach(product => {
-      if (!brandStats.has(product.marca)) {
-        brandStats.set(product.marca, { green: 0, red: 0, yellow: 0, damaged: 0 });
+      if (!brandStatsMap.has(product.marca)) {
+        brandStatsMap.set(product.marca, { green: 0, red: 0, yellow: 0, damaged: 0, total: 0, totalStock: 0 });
       }
       
-      const stats = brandStats.get(product.marca)!;
+      const stats = brandStatsMap.get(product.marca)!;
+      stats.total++;
+      stats.totalStock += product.quantidade;
       
       if (product.statusValidade === 'verde') stats.green++;
       else if (product.statusValidade === 'vermelho') stats.red++;
@@ -99,21 +102,30 @@ export class MemStorage implements IStorage {
       if (product.avariado) stats.damaged++;
     });
 
-    let mostGreen = { name: '', count: 0 };
-    let mostRed = { name: '', count: 0 };
-    let mostDamaged = { name: '', count: 0 };
+    // Convert to array and sort
+    const allBrandStats: BrandStats[] = Array.from(brandStatsMap.entries()).map(([marca, stats]) => ({
+      marca,
+      green: stats.green,
+      red: stats.red,
+      yellow: stats.yellow,
+      damaged: stats.damaged,
+      total: stats.total,
+      totalStock: stats.totalStock
+    }));
 
-    brandStats.forEach((stats, brand) => {
-      if (stats.green > mostGreen.count) {
-        mostGreen = { name: brand, count: stats.green };
-      }
-      if (stats.red > mostRed.count) {
-        mostRed = { name: brand, count: stats.red };
-      }
-      if (stats.damaged > mostDamaged.count) {
-        mostDamaged = { name: brand, count: stats.damaged };
-      }
-    });
+    // Find top brands (handling ties by showing all brands with the same count)
+    const maxGreen = Math.max(...allBrandStats.map(b => b.green));
+    const maxRed = Math.max(...allBrandStats.map(b => b.red));
+    const maxDamaged = Math.max(...allBrandStats.map(b => b.damaged));
+
+    const mostGreenBrands = allBrandStats.filter(b => b.green === maxGreen);
+    const mostRedBrands = allBrandStats.filter(b => b.red === maxRed);
+    const mostDamagedBrands = allBrandStats.filter(b => b.damaged === maxDamaged);
+
+    // For backward compatibility, pick the first one but now we have the full list
+    const mostGreen = mostGreenBrands.length > 0 ? { name: mostGreenBrands[0].marca, count: maxGreen } : { name: '', count: 0 };
+    const mostRed = mostRedBrands.length > 0 ? { name: mostRedBrands[0].marca, count: maxRed } : { name: '', count: 0 };
+    const mostDamaged = mostDamagedBrands.length > 0 ? { name: mostDamagedBrands[0].marca, count: maxDamaged } : { name: '', count: 0 };
 
     const topProductsByStock = allProducts
       .sort((a, b) => b.quantidade - a.quantidade)
@@ -145,6 +157,7 @@ export class MemStorage implements IStorage {
         mostRed,
         mostDamaged
       },
+      allBrandStats,
       topProductsByStock,
       criticalProducts
     };

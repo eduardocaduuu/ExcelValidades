@@ -36,6 +36,16 @@ export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Product = typeof products.$inferSelect;
 
 // Dashboard analytics types
+export interface BrandStats {
+  marca: string;
+  green: number;
+  red: number;
+  yellow: number;
+  damaged: number;
+  total: number;
+  totalStock: number;
+}
+
 export interface DashboardStats {
   totalProducts: number;
   expiredProducts: number;
@@ -51,6 +61,7 @@ export interface DashboardStats {
     mostRed: { name: string; count: number };
     mostDamaged: { name: string; count: number };
   };
+  allBrandStats: BrandStats[];
   topProductsByStock: Array<{
     nome: string;
     marca: string;
