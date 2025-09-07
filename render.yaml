@@ -4,10 +4,9 @@ services:
     env: node
     region: oregon
     plan: free
-    buildCommand: cd ExcelValidades && npm install && ./node_modules/.bin/vite build && ./node_modules/.bin/esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+    buildCommand: cd ExcelValidades && npm install && npm run build:simple
     startCommand: cd ExcelValidades && npm start
     envVars:
       - key: NODE_ENV
         value: production
     healthCheckPath: /
-    autoDeploy: true
