@@ -36,4 +36,12 @@ else
     npm run build:server
 fi
 
+# Debug: Show what was created
+echo "🔍 Checking dist directory..."
+ls -la dist/ || echo "No dist directory found"
+
+# Debug: Show current directory structure
+echo "🔍 Current directory contents..."
+ls -la
+
 echo "✅ Build completed!"
