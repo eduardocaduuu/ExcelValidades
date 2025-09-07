@@ -2,8 +2,12 @@ services:
   - type: web
     name: excelvalidades
     env: node
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    region: oregon
+    plan: free
+    buildCommand: cd ExcelValidades && npm ci && npm run build
+    startCommand: cd ExcelValidades && npm start
     envVars:
       - key: NODE_ENV
         value: production
+    healthCheckPath: /
+    autoDeploy: true
