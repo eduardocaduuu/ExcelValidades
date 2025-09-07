@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(210, 40%, 96%);
+  --foreground: hsl(222, 84%, 4%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(222, 84%, 4%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(222, 84%, 4%);
+  --primary: hsl(221, 100%, 50%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(330, 100%, 50%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(210, 40%, 92%);
+  --muted-foreground: hsl(215, 16%, 45%);
+  --accent: hsl(60, 100%, 50%);
+  --accent-foreground: hsl(222, 84%, 4%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(214, 32%, 91%);
+  --input: hsl(214, 32%, 91%);
+  --ring: hsl(221, 100%, 50%);
+  --chart-1: hsl(221, 100%, 50%);
+  --chart-2: hsl(159.7826, 100%, 36.0784%);
+  --chart-3: hsl(42.0290, 92.8251%, 56.2745%);
+  --chart-4: hsl(147.1429, 78.5047%, 41.9608%);
+  --chart-5: hsl(341.4894, 75.2000%, 50.9804%);
+  --sidebar: hsl(0, 0%, 100%);
+  --sidebar-foreground: hsl(222, 84%, 4%);
+  --sidebar-primary: hsl(221, 100%, 50%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(60, 100%, 50%);
+  --sidebar-accent-foreground: hsl(222, 84%, 4%);
+  --sidebar-border: hsl(214, 32%, 91%);
+  --sidebar-ring: hsl(221, 100%, 50%);
+  --font-sans: Inter, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 8px;
+  --green-status: hsl(147, 100%, 40%);
+  --yellow-status: hsl(51, 100%, 50%);
+  --red-status: hsl(0, 84%, 60%);
+}
+
+.dark {
+  --background: hsl(222, 84%, 4%);
+  --foreground: hsl(210, 40%, 96%);
+  --card: hsl(222, 84%, 8%);
+  --card-foreground: hsl(210, 40%, 96%);
+  --popover: hsl(222, 84%, 4%);
+  --popover-foreground: hsl(210, 40%, 96%);
+  --primary: hsl(221, 100%, 60%);
+  --primary-foreground: hsl(222, 84%, 4%);
+  --secondary: hsl(330, 100%, 60%);
+  --secondary-foreground: hsl(222, 84%, 4%);
+  --muted: hsl(222, 84%, 12%);
+  --muted-foreground: hsl(215, 16%, 55%);
+  --accent: hsl(60, 100%, 60%);
+  --accent-foreground: hsl(222, 84%, 4%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(222, 84%, 16%);
+  --input: hsl(222, 84%, 16%);
+  --ring: hsl(221, 100%, 60%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer components {
+  /* Neobrutalist Custom Styles */
+  .neo-shadow {
+    box-shadow: 6px 6px 0px #000000;
+  }
+  
+  .neo-shadow-lg {
+    box-shadow: 8px 8px 0px #000000;
+  }
+  
+  .neo-border {
+    border: 4px solid #000000;
+  }
+  
+  .neo-border-thick {
+    border: 6px solid #000000;
+  }
+  
+  .hover-lift {
+    transition: all 0.2s ease;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 10px 10px 0px #000000;
+  }
+  
+  .neo-button {
+    transition: all 0.1s ease;
+  }
+  
+  .neo-button:active {
+    transform: translate(3px, 3px);
+    box-shadow: 3px 3px 0px #000000;
+  }
+}
+
+@layer utilities {
+  .animate-bounce-in {
+    animation: bounceIn 0.6s ease-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+  
+  @keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+}
